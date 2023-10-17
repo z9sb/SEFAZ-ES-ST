@@ -48,17 +48,28 @@ class Api:
         
         return dados
 
-    def comparation_ncm_cst(self, chave, ncms, cests, cfops, name_prods):
-        with open('test.csv', 'a', newline="") as csv_file:
+    def comparation_ncm_cst(
+        self, chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, name_prods,
+                    v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms):
+        with open(f'{cnpj_dest}.csv', 'a', newline="") as csv_file:
             self.csv_withe = writer(csv_file, delimiter=";")
-            for ncm, cest, cfop, name_prod in zip(ncms, cests, cfops, name_prods):
+            self.csv_withe.writerow([chave, n_nf, name_for])
+            for (ncm, cest, cfop, name_prod, v_prod, v_ipi,
+                 v_outro, v_frete, v_desc, v_icm) in zip(
+                ncms, cests, cfops, name_prods, v_prods, v_ipis,
+                v_outros, v_fretes, v_descs, v_icms):
                 if any(ncm.startswith(item) for item in self.ncm_l):
+                    bc_icms_st = (float(v_prod) + float(v_ipi) + float(v_outro)+
+                                          float(v_frete) - float(v_desc))
+                    icms_dest = float(v_icm)
                     if cest != 0:
                         if cest in self.cst_l:
-                            self.csv_withe.writerow([chave, ncm, cest, cfop, name_prod])
+                            self.csv_withe.writerow(
+                                [ncm, cest, cfop, bc_icms_st, icms_dest, name_prod])
                             
                     else:
-                        self.csv_withe.writerow([chave, ncm, cest, cfop, name_prod])
+                        self.csv_withe.writerow(
+                                [ncm, cest, cfop, bc_icms_st, icms_dest, name_prod])
 
     def xml_search(self, file_xml, root_dir):
         for root_file in file_xml:
@@ -67,9 +78,18 @@ class Api:
             xml = NFe(root)
             cests = xml.cest()
             ncms = xml.ncm()
-            chave = xml.acess_key()
             cfops = xml.cfop()
+            chave = xml.acess_key()
+            n_nf = xml.number_nf()
             name_prods = xml.name_prod()
+            v_prods = xml.v_prod()
+            v_ipis = xml.v_ipi()
+            v_outros = xml.v_outros()
+            v_fretes = xml.v_frete()
+            v_descs = xml.v_desc()
+            v_icms = xml.v_icms()
+            name_for = xml.name_for()
+            cnpj_dest = xml.cnpj_dest()
             estado_cli = xml.estado_cli()
             estado_for = xml.estado_for()
 
@@ -78,4 +98,7 @@ class Api:
             
             else:
                 print(chave)
-                self.comparation_ncm_cst(chave, ncms, cests, cfops, name_prods)
+                self.comparation_ncm_cst(
+                    chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, name_prods,
+                    v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms
+                    )
