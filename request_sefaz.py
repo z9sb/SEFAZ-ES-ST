@@ -3,12 +3,11 @@ from xml_file import NFe
 from csv import writer
 
 class Api:
-    def __init__(self, html_content, file_xml, root_dir) -> None:
+    def __init__(self, html_content, file_xml) -> None:
         self.html = bs(html_content.text, 'html.parser')
         self.file_xml = file_xml
-        self.root_dir = root_dir
         self.loc_class()
-        self.xml_search(self.file_xml, self.root_dir)
+        self.xml_search(self.file_xml)
 
     def find_all_tag_html(self, html_parser, tag):
         return [valor for valor in html_parser.find_all(tag)]
@@ -50,14 +49,17 @@ class Api:
 
     def comparation_ncm_cst(
         self, chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, name_prods,
-                    v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms):
+        v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms):
+        
         with open(f'{cnpj_dest}.csv', 'a', newline="") as csv_file:
             self.csv_withe = writer(csv_file, delimiter=";")
             self.csv_withe.writerow([chave, n_nf, name_for])
+            
             for (ncm, cest, cfop, name_prod, v_prod, v_ipi,
                  v_outro, v_frete, v_desc, v_icm) in zip(
                 ncms, cests, cfops, name_prods, v_prods, v_ipis,
-                v_outros, v_fretes, v_descs, v_icms):
+                v_outros, v_fretes, v_descs, v_icms
+                ):
                 if any(ncm.startswith(item) for item in self.ncm_l):
                     bc_icms_st = (float(v_prod) + float(v_ipi) + float(v_outro)+
                                           float(v_frete) - float(v_desc))
@@ -71,34 +73,37 @@ class Api:
                         self.csv_withe.writerow(
                                 [ncm, cest, cfop, bc_icms_st, icms_dest, name_prod])
 
-    def xml_search(self, file_xml, root_dir):
-        for root_file in file_xml:
-            root = (f'{root_dir}/{root_file}')
-            
-            xml = NFe(root)
-            cests = xml.cest()
-            ncms = xml.ncm()
-            cfops = xml.cfop()
-            chave = xml.acess_key()
-            n_nf = xml.number_nf()
-            name_prods = xml.name_prod()
-            v_prods = xml.v_prod()
-            v_ipis = xml.v_ipi()
-            v_outros = xml.v_outros()
-            v_fretes = xml.v_frete()
-            v_descs = xml.v_desc()
-            v_icms = xml.v_icms()
-            name_for = xml.name_for()
-            cnpj_dest = xml.cnpj_dest()
-            estado_cli = xml.estado_cli()
-            estado_for = xml.estado_for()
+    def xml_search(self, file_xml):
+        try:
+            for root_file in file_xml:
+                xml = NFe(root_file)
 
-            if estado_cli == estado_for:
-                pass
-            
-            else:
-                print(chave)
-                self.comparation_ncm_cst(
-                    chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, name_prods,
-                    v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms
-                    )
+                estado_cli = xml.estado_cli()
+                estado_for = xml.estado_for()
+                
+                if estado_cli == estado_for:
+                    pass
+                
+                else:
+                    cests = xml.cest()
+                    ncms = xml.ncm()
+                    cfops = xml.cfop()
+                    chave = xml.acess_key()
+                    n_nf = xml.number_nf()
+                    name_prods = xml.name_prod()
+                    v_prods = xml.v_prod()
+                    v_ipis = xml.v_ipi()
+                    v_outros = xml.v_outros()
+                    v_fretes = xml.v_frete()
+                    v_descs = xml.v_desc()
+                    v_icms = xml.v_icms()
+                    name_for = xml.name_for()
+                    cnpj_dest = xml.cnpj_dest()
+
+                    print(chave)
+                    self.comparation_ncm_cst(
+                        chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, 
+                        name_prods, v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms
+                        )
+        except:
+            pass

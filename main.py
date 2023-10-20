@@ -1,4 +1,4 @@
-from os import listdir
+from os import walk, path
 from pathlib import Path
 from easygui import diropenbox #type: ignore 
 from request_sefaz import Api
@@ -9,6 +9,11 @@ html_content = Session().get(url_html)
 
 rootdir = diropenbox(default= 'C:\donwload\*.xml')
 root_dir = Path(rootdir)
-file_xml = list(i for i in listdir(root_dir) if i.endswith('.xml'))
 
-Api(html_content, file_xml, root_dir)
+file_xml = []
+for pasta_atual, subpastas, arquivos in walk(root_dir):
+    for arquivo in arquivos: 
+        if arquivo.endswith('.xml'): 
+            file_xml.append(path.join(pasta_atual, arquivo))
+
+Api(html_content, file_xml)
