@@ -43,41 +43,41 @@ class Api:
                 dados.append(linha)
             
         self.ncm_l = set({item for sub in dados for item in sub['NCM']})
-        self.cst_l = set({item for sub in dados for item in sub['CEST']})
+        self.cest_l = set({item for sub in dados for item in sub['CEST']})
         
         return dados
 
     def comparation_ncm_cst(
         self, chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, name_prods,
-        v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms):
+        v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms, ali_icms):
         
         with open(f'{cnpj_dest}.csv', 'a', newline="") as csv_file:
             self.csv_withe = writer(csv_file, delimiter=";")
             self.csv_withe.writerow([chave, n_nf, name_for])
             
             for (ncm, cest, cfop, name_prod, v_prod, v_ipi,
-                 v_outro, v_frete, v_desc, v_icm) in zip(
+                 v_outro, v_frete, v_desc, v_icm, ali_icm) in zip(
                 ncms, cests, cfops, name_prods, v_prods, v_ipis,
-                v_outros, v_fretes, v_descs, v_icms
+                v_outros, v_fretes, v_descs, v_icms, ali_icms
                 ):
                 if any(ncm.startswith(item) for item in self.ncm_l):
                     bc_icms_st = (float(v_prod) + float(v_ipi) + float(v_outro)+
                                           float(v_frete) - float(v_desc))
                     icms_dest = float(v_icm)
+                    f_ncm = f'{ncm[0:5]}.{ncm[4:7]}.{ncm[7:9]}'
+                    f_cest = f'{cest[0:2]}.{cest[3:6]}.{cest[6:7]}'
                     if cest != 0:
-                        if cest in self.cst_l:
+                        if cest in self.cest_l:
                             self.csv_withe.writerow(
-                                [ncm, cest, cfop, bc_icms_st, icms_dest, name_prod])
-                            
+                                [f_ncm, f_cest, cfop, bc_icms_st, icms_dest, ali_icm, name_prod])
                     else:
                         self.csv_withe.writerow(
-                                [ncm, cest, cfop, bc_icms_st, icms_dest, name_prod])
-
+                                [f_ncm, f_cest, cfop, bc_icms_st, icms_dest, ali_icm, name_prod])
+                            
     def xml_search(self, file_xml):
-        try:
-            for root_file in file_xml:
+        for root_file in file_xml:
+            try:
                 xml = NFe(root_file)
-
                 estado_cli = xml.estado_cli()
                 estado_for = xml.estado_for()
                 
@@ -97,13 +97,14 @@ class Api:
                     v_fretes = xml.v_frete()
                     v_descs = xml.v_desc()
                     v_icms = xml.v_icms()
+                    ali_icms = xml.ali_icms()
                     name_for = xml.name_for()
                     cnpj_dest = xml.cnpj_dest()
 
                     print(chave)
                     self.comparation_ncm_cst(
-                        chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, 
-                        name_prods, v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms
+                        chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, name_prods,
+                        v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms, ali_icms
                         )
-        except:
-            pass
+            except:
+                pass
