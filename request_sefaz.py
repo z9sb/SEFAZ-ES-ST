@@ -74,10 +74,9 @@ class Api:
                                 [ncm, cest, cfop, bc_icms_st, icms_dest, name_prod])
 
     def xml_search(self, file_xml):
-        try:
-            for root_file in file_xml:
+        for root_file in file_xml:
+            try:
                 xml = NFe(root_file)
-
                 estado_cli = xml.estado_cli()
                 estado_for = xml.estado_for()
                 
@@ -105,5 +104,5 @@ class Api:
                         chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, 
                         name_prods, v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms
                         )
-        except:
-            pass
+            except:
+                pass
