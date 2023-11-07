@@ -2,6 +2,8 @@ from bs4 import BeautifulSoup as bs  # type: ignore
 from xml_file import NFe
 from csv import writer
 
+cnpjs = ['35795771000105']
+
 class Api:
     def __init__(self, html_content, file_xml) -> None:
         self.html = bs(html_content.text, 'html.parser')
@@ -80,8 +82,9 @@ class Api:
                 xml = NFe(root_file)
                 estado_cli = xml.estado_cli()
                 estado_for = xml.estado_for()
+                cnpj_dest = xml.cnpj_dest()
                 
-                if estado_cli == estado_for:
+                if estado_cli == estado_for and not cnpj_dest in cnpjs:
                     pass
                 
                 else:
@@ -99,9 +102,8 @@ class Api:
                     v_icms = xml.v_icms()
                     ali_icms = xml.ali_icms()
                     name_for = xml.name_for()
-                    cnpj_dest = xml.cnpj_dest()
-
-                    print(chave)
+                    
+                    print(f'A nota fical {chave} esta sendo processada.')
                     self.comparation_ncm_cst(
                         chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, name_prods,
                         v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms, ali_icms

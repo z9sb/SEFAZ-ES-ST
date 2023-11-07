@@ -4,7 +4,6 @@ from email.header import decode_header
 from main import main
 from datetime import datetime
 
-
 #diretório para download
 root_dir = r"C:\\Users\\raysl_3a68bgu\\OneDrive\\Documentos\\Python\\outlook\\Arquivos\\"
 
