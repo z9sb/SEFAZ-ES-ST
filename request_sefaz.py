@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup as bs  # type: ignore
 from xml_file import NFe
 from csv import writer
 
-cnpjs = ['35795771000105']
+cnpjs = [35795771000105]
 
 class Api:
     def __init__(self, html_content, file_xml) -> None:
@@ -17,10 +17,17 @@ class Api:
     def style_check(self, item):
         style = ('font-size:8.0pt;font-family:"Verdana","sans-serif";\r\n' +
                  '  color:black')
+        style_no_black = ('font-size:8.0pt;font-family:"Verdana","sans-serif"')
+
         if item.find('span') is not None and style == item.find(
             'span')['style'] and item['width'] == '74' and item.find(
                 'span').text != '\xa0':
             return True
+        elif item.find('span') is not None and style_no_black == item.find(
+            'span')['style'] and item['width'] == '74' and item.find(
+                'span').text != '\xa0':
+            return True
+        
         else:
             return False
 
@@ -41,9 +48,9 @@ class Api:
                 else:
                     continue
                 
-            if not linha == {'CEST': [], 'NCM': []} and index != 1:
+            if not linha == {'CEST': [], 'NCM': []}:
                 dados.append(linha)
-            
+                
         self.ncm_l = set({item for sub in dados for item in sub['NCM']})
         self.cest_l = set({item for sub in dados for item in sub['CEST']})
         
@@ -62,13 +69,15 @@ class Api:
                 ncms, cests, cfops, name_prods, v_prods, v_ipis,
                 v_outros, v_fretes, v_descs, v_icms, ali_icms
                 ):
+
                 if any(ncm.startswith(item) for item in self.ncm_l):
                     bc_icms_st = (float(v_prod) + float(v_ipi) + float(v_outro)+
                                           float(v_frete) - float(v_desc))
                     icms_dest = float(v_icm)
-                    f_ncm = f'{ncm[0:5]}.{ncm[4:7]}.{ncm[7:9]}'
-                    f_cest = f'{cest[0:2]}.{cest[3:6]}.{cest[6:7]}'
+                    f_ncm = f'{ncm[0:4]}.{ncm[4:6]}.{ncm[6:]}'
+                    f_cest = '0'
                     if cest != 0:
+                        f_cest = f'{cest[0:2]}.{cest[2:5]}.{cest[5:]}'
                         if cest in self.cest_l:
                             self.csv_withe.writerow(
                                 [f_ncm, f_cest, cfop, bc_icms_st, icms_dest, ali_icm, name_prod])
@@ -108,5 +117,5 @@ class Api:
                         chave, n_nf, name_for, cnpj_dest, ncms, cests, cfops, name_prods,
                         v_prods, v_ipis, v_outros, v_fretes, v_descs, v_icms, ali_icms
                         )
-            except:
-                pass
+            except Exception as e:
+                print(f"Ocorreu um erro durante a execução o erro é: {e}")

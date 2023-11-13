@@ -22,7 +22,7 @@ mail.select("inbox")
 # Pesquisando emails com anexos
 status, messages = mail.search(None, "ALL")
 messages = list(reversed(messages[0].split()))
-
+print(messages)
 for mail_id in messages:
     _, msg_parts = mail.fetch(mail_id, "(RFC822)")
     msg = email.message_from_bytes(msg_parts[0][1])
@@ -38,6 +38,10 @@ for mail_id in messages:
     print(f"Date: {date}")
     if 'UTC' in date:
         date_email = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z (UTC)")
+        
+    elif len(date) == 25:
+        date_email = datetime.strptime(date, "%d %b %Y %H:%M:%S %z")
+        
     else:
         date_email = datetime.strptime(date, "%a, %d %b %Y %H:%M:%S %z")
     
